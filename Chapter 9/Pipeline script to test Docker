@@ -1,0 +1,13 @@
+pipeline {
+    agent {
+            label 'linux-agent'
+        }
+    stages {
+        stage('Run sh commands') {
+            steps {
+                sh 'hostname'
+                sh 'ps -ef | grep java'
+            }
+        }
+    }
+}
