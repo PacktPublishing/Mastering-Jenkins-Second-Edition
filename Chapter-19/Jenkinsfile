@@ -1,0 +1,33 @@
+pipeline {
+    agent any
+    tools {
+        maven 'Default Maven' 
+        jdk 'Default JDK'
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn clean compile'
+            }
+        }
+        stage('Unit Test') {
+            sh 'mvn test'
+            junit '**/target/surefire-reports/TEST-*.xml'
+        }
+    }
+    post {
+        failure {
+            script {
+                withEnv(['JIRA_SITE=Default']) {
+                    def testIssue = [fields: [ project: [id: '<Your Jira Project ID>'],
+                    summary: 'Testing failed for build ${BUILD_NUMBER} of ${JOB_NAME}.',
+                    description: 'Check the following build in Jenkins: ${BUILD_URL}.',
+                    issuetype: [id: '<Jira Issue Type ID>']]]
+                    response = jiraNewIssue issue: testIssue
+                    echo response.successful.toString()
+                    echo response.data.toString()
+                }
+            }    
+        }
+    }
+}
