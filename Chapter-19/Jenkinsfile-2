@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+    tools {
+        maven 'Default Maven' 
+        jdk 'Default JDK'
+    }
+    environment {
+        JIRA_URL = '<Your Jira URL>'
+        JIRA_CREDENTIALS = credentials('jira-credentials')
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn clean compile'
+            }
+        }
+        stage('Unit Test') {
+            steps {
+            sh 'mvn test'
+            junit '**/target/surefire-reports/TEST-*.xml'
+            }
+        }
+    }
+    post {
+        failure {
+            sh """
+                curl --request POST --url ${JIRA_URL}/rest/api/2/issue --user '${JIRA_CREDENTIALS}' --header 'Accept: application/json' --header 'Content-Type: application/json' --data @- << EOF
+                {
+                    "fields": {
+                        "issuetype": {
+                            "id": "<Your IssueType Id>",
+                            "description": "A task that needs to be done.",
+                            "name": "Task",
+                            "subtask": false
+                        },
+                        "description": "Check the following build in Jenkins: ${BUILD_URL}.",
+                        "project": {
+                            "id": "<Your Jira Project Id>",
+                            "key": "<Your Jira Project Key>",
+                            "name": "<Your Jira Project Name>"
+                        },
+                        "summary": "Testing failed for build ${BUILD_NUMBER} of ${JOB_NAME}.",
+                        "reporter": {
+                            "name": "<Jira User Name>",
+                            "key": "<Jira User Key, should be the same as Name>",
+                            "emailAddress": "<Email address of the Jira User>",
+                            "displayName": "<Email address of the Jira User>",
+                            "active": true,
+                            "timeZone": "GMT"
+                        },
+                        "priority": {
+                            "name": "Medium",
+                            "id": "3"
+                        },
+                        "assignee": {
+                            "name": "<Jira User Name>",
+                            "key": "<Jira User Key, should be the same as Name>",
+                            "emailAddress": "<Email address of the Jira User>",
+                            "displayName": "<Email address of the Jira User>",
+                            "active": true,
+                            "timeZone": "GMT"
+                        }
+                    }
+                }
+                EOF
+            """
+        }
+    }
+}
