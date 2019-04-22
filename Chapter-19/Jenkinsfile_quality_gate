@@ -1,0 +1,18 @@
+pipeline {
+agent any
+environment {
+      scannerHome = tool 'Default SonarScanner'
+    }
+    stages {
+      stage('Static Code Analysis') {
+          steps {
+            withSonarQubeEnv('Default SonarQube Server') {
+                sh "${scannerHome}/bin/sonar-scanner"
+            }
+            timeout(time: 1, unit: 'MINUTES') {
+              waitForQualityGate abortPipeline: true
+            }
+          }
+      }
+    }
+}
