@@ -1,0 +1,19 @@
+/* Custom style to change Jenkins logo*/
+.logo img {
+content:url("<Your Jenkins URL>/userContent/layout/logo.png");
+}
+
+.logo #jenkins-name-icon {
+display: none;
+}
+
+.logo:after {
+content: '<Text that you would like to display besides the logo>';
+font-family: arial;
+font-weight: bold;
+font-size: 20px;
+margin-left: 234px;
+margin-right: 12px;
+color: white;
+line-height: 40px;
+}
