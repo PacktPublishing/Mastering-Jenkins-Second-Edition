@@ -1,0 +1,26 @@
+version: '3.3'
+
+services:
+  jenkins:
+    build:
+      context: .
+      args:
+        JAVA_OPTS: '-Djenkins.CLI.disabled=true'
+    ports:
+      - 8080:8080
+      - 50000:5000
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - ./jenkins.yaml:/var/jenkins_home/jenkins.yaml
+    secrets:
+      - github
+      - adminpassword
+    environment:
+      - CASC_JENKINS_CONFIG=/var/jenkins_home/jenkins.yaml
+secrets:
+  github:
+    file: ./github
+  adminpassword:
+    file: ./adminpassword
+volumes:
+  jenkins_home:

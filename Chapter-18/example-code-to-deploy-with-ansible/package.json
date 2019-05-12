@@ -1,0 +1,13 @@
+{
+  "name": "Site",
+  "version": "1.0.0",
+  "private": "true",
+  "main": "app.js",
+  "dependencies": {
+    "express": "4.16.4",
+    "pug": "^2.0.3",
+    "nib": "^1.0.4",
+    "stylus": "^0.54.5",
+    "morgan": "^1.9.1"
+  }
+}

@@ -1,0 +1,20 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+VAGRANTFILE_API_VERSION = 2
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.vm.box = "Microsoft/EdgeOnWindows10"
+  config.vm.box_version = "1.0"
+  config.vm.network "public_network",
+    use_dhcp_assigned_default_route: true
+
+  config.vm.provider :virtualbox do |vb|
+    vb.customize [
+      'modifyvm', :id,
+      '--natdnshostresolver1', 'on',
+      '--memory', '2048',
+      '--cpus', '2'
+    ]
+  end
+
+end

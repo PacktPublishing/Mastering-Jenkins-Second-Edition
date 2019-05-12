@@ -1,0 +1,7 @@
+---
+- hosts: "{{ SITE }}"
+  remote_user: "{{ SITE_USER }}"
+  roles:
+     - deploy
+  vars:
+    - artifact_url: "{{ ARTIFACT_URL }}"

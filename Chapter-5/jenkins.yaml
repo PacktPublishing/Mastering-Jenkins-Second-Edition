@@ -1,0 +1,38 @@
+jenkins:
+  systemMessage: "Jenkins configured automatically by Jenkins Configuration as Code Plugin"
+  numExecutors: 1
+  mode: NORMAL
+  scmCheckoutRetryCount: 3
+  labelString: "master-label"
+  
+  securityRealm:
+    local:
+      allowsSignup: true
+      users:
+        - id: admin
+          password: ${adminpassword}
+  
+tool:
+  git:
+    installations:
+      - name: git
+        home: /usr/local/bin/git
+
+unclassified:
+  githubpluginconfig:
+    configs:
+    - name: "Public GitHub"
+      apiUrl: "https://api.github.com"
+      credentialsId: "github-secret-text"
+      manageHooks: true
+
+credentials:
+  system:
+    domainCredentials:
+       - credentials:
+          - string:
+              scope: GLOBAL
+              id: "github-secret-text"
+              secret: ${github}
+              description: "Secret Text"
+

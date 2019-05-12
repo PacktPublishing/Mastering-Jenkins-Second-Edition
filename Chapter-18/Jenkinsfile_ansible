@@ -1,0 +1,72 @@
+pipeline {
+    agent none
+    environment {
+     site_user = 'root'
+     artifactory_url = '<Your Artifactory URL>'
+    }
+    stages {
+        stage('Build') {
+            tools {
+                nodejs 'Default NodeJS'
+            }
+            agent {
+                label 'build-agent'
+            }
+            steps {
+                sh '''
+                cd example-code-to-deploy-with-ansible
+                npm install
+                tar -zcvf ${BUILD_NUMBER}.tgz *
+                '''
+                stash includes: "example-code-to-deploy-with-ansible/${BUILD_NUMBER}.tgz", name: 'artifact'
+            }
+        }
+        stage('Publish to Artifactory') {
+            options { 
+                skipDefaultCheckout() 
+            }
+            agent {
+                label 'build-agent'
+            }
+            steps {
+                unstash 'artifact'
+                rtUpload (
+                serverId: "Default Artifactory",
+                spec:
+                    """{
+                    "files": [
+                        {
+                          "pattern": "example-code-to-deploy-with-ansible/${BUILD_NUMBER}.tgz",
+                          "target": "<Artifactory Repository Name>/${BUILD_NUMBER}/"
+                        }
+                    ]
+                    }"""
+                )
+            }
+        }
+        stage('Deploy to Prod') {
+            agent {
+                label 'ansible-agent'
+            }
+            environment {
+                site = 'prod'
+                artifact_url = "${artifactory_url}/<Artifactory Repository Name>/${BUILD_NUMBER}/${BUILD_NUMBER}.tgz"
+                ansibleHome = tool 'Default Ansible'
+            }
+            steps {
+                echo 'Deploying to Prod'
+                ansiblePlaybook(
+                    credentialsId: 'jenkins-agent-credentials', 
+                    inventory: 'example-ansible-playbook/hosts.ini', 
+                    playbook: 'example-ansible-playbook/playbook.yml',
+                    extras: '-v',
+                    extraVars: [
+                        SITE: "${site}",
+                        SITE_USER: "${site_user}",
+                        ARTIFACT_URL: [value: "${artifact_url}", hidden:true]
+                    ]
+                )
+            }
+        }
+    }
+}

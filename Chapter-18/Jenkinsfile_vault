@@ -1,0 +1,23 @@
+pipeline {
+  agent any
+  stages {
+    stage('fetch data from Vault') {
+      steps {
+        script {
+          // Assign Vault secrets to env variables
+          def secrets = [
+            [$class: 'VaultSecret', path: 'kv/prod', secretValues: [
+              [$class: 'VaultSecretValue', envVar: 'prod_usr', vaultKey: 'production_server_username'],
+              [$class: 'VaultSecretValue', envVar: 'prod_pas', vaultKey: 'production_server_password']
+            ]],
+          ]
+          // Wrapper to avail env variables
+          wrap([$class: 'VaultBuildWrapper', vaultSecrets: secrets]) {
+            sh 'echo $prod_usr'
+            sh 'echo $prod_pas'
+          }
+        }
+      }
+    }
+  }
+}

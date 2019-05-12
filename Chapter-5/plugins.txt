@@ -1,0 +1,6 @@
+configuration-as-code:latest
+configuration-as-code-support:latest
+credentials:latest
+git:latest
+github:latest
+

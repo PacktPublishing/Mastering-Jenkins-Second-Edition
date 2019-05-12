@@ -1,0 +1,45 @@
+version: '3.2'
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./logs/nginx:/var/log/nginx
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/nginx.crt:/etc/nginx/ssl/nginx.crt
+      - ./nginx/nginx.key:/etc/nginx/ssl/nginx.key
+    networks:
+      jenkins-nginx-default:
+        ipv4_address: <Jenkins Container IP>
+    restart: always
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    expose:
+      - '8080'
+      - '50000'
+      - '50022'
+    volumes:
+      - "jenkins_home:/var/jenkins_home"
+    networks:
+      jenkins-nginx-default:
+        ipv4_address: <Nginx Container IP>
+    environment:
+      - UID_JENKINS=1000
+      - GID_JENKINS=1000
+    restart: always
+
+volumes:
+  jenkins_home:
+
+networks:
+  jenkins-nginx-default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: <Custom Docker network>
