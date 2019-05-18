@@ -8,7 +8,12 @@ pipeline {
         }
       }
       steps {
-        sh 'mvn -Dmaven.test.failure.ignore clean package'
+        sh '''
+			    export M2_HOME=/home/jenkins/tools/hudson.tasks.Maven_MavenInstallation/Default_Maven
+			    export M2=$M2_HOME/bin
+			    export PATH=$M2:$PATH
+			    mvn -Dmaven.test.failure.ignore clean package
+		    '''
         stash(name: 'build-test-artifacts', \
         includes: '**/target/surefire-reports/TEST-*.xml,target/*.jar')
       }
